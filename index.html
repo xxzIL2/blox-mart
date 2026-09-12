@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLOX MART</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Tahoma,sans-serif;background:#07111f;color:#fff}
+header{padding:22px 7%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #17304e;background:#081525;position:sticky;top:0;z-index:5}
+.logo{font-size:28px;font-weight:900;letter-spacing:2px}.logo span{color:#39a7ff}
+nav a{color:#bcd0e8;text-decoration:none;margin:0 10px}
+.hero{padding:75px 7%;text-align:center;background:radial-gradient(circle at top,#123d68,#07111f 55%)}
+.hero h1{font-size:56px;margin:0 0 12px}.hero h1 span{color:#39a7ff}.hero p{color:#b8c8da;font-size:18px}
+.container{max-width:1200px;margin:auto;padding:35px 20px}
+.controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:25px}
+input,select{width:100%;padding:14px;border-radius:12px;border:1px solid #284766;background:#0d1b2c;color:white;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}
+.card{background:#0d1b2c;border:1px solid #1c3856;border-radius:18px;padding:20px;transition:.2s}
+.card:hover{transform:translateY(-3px);border-color:#39a7ff}
+.fruit{font-size:20px;font-weight:800}
+.price{font-size:25px;color:#55b7ff;font-weight:900;margin:12px 0}
+.small{color:#9eb2c8;font-size:13px}
+.btn{border:0;border-radius:11px;padding:11px 15px;background:#168cff;color:white;font-weight:800;cursor:pointer;width:100%}
+.section-title{margin-top:10px;font-size:30px}
+.box{background:#0d1b2c;border:1px solid #1c3856;border-radius:18px;padding:22px;margin-top:28px}
+.checkout{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.total{font-size:25px;font-weight:900;color:#62c0ff;margin-top:15px}
+footer{text-align:center;padding:35px;color:#8ea4ba;border-top:1px solid #17304e;margin-top:40px}
+@media(max-width:700px){.controls,.checkout{grid-template-columns:1fr}.hero h1{font-size:40px}}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">BLOX <span>MART</span></div>
+  <nav>
+    <a href="#shop">المتجر</a>
+    <a href="#checkout">الطلب</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>مرحباً في <span>BLOX MART</span></h1>
+  <p>متجر فواكه Blox Fruits — اختر الفاكهة والكمية وشاهد السعر بعملتك.</p>
+</section>
+
+<main class="container" id="shop">
+
+<h2 class="section-title">🛒 الفواكه والأسعار</h2>
+
+<div class="controls">
+<input id="search" placeholder="🔎 ابحث عن فاكهة...">
+
+<select id="currency">
+<option value="ASIA">ASIA</option>
+<option value="SAR">ريال سعودي (SAR)</option>
+<option value="AED">درهم إماراتي (AED)</option>
+<option value="IQD">دينار عراقي (IQD)</option>
+<option value="USD">دولار أمريكي (USD)</option>
+<option value="KWD">دينار كويتي (KWD)</option>
+<option value="QAR">ريال قطري (QAR)</option>
+<option value="BHD">دينار بحريني (BHD)</option>
+<option value="OMR">ريال عماني (OMR)</option>
+</select>
+
+<select id="qty">
+<option>1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>10</option>
+</select>
+</div>
+
+<div class="grid" id="products"></div>
+
+<section class="box" id="checkout">
+<h2>📦 تأكيد الطلب</h2>
+
+<div class="checkout">
+<input id="name" placeholder="اسمك">
+<input id="discord" placeholder="اسم Discord">
+
+<select id="payment">
+<option>Apple Pay</option>
+<option>Visa / Mastercard</option>
+<option>تحويل بنكي</option>
+<option>طريقة دفع أخرى</option>
+</select>
+
+<select id="selected"></select>
+</div>
+
+<div class="total" id="total">الإجمالي: —</div>
+
+<button class="btn" onclick="confirmOrder()">تأكيد الطلب</button>
+
+<p class="small">
+ملاحظة: زر التأكيد يعرض ملخص الطلب فقط. لربط الدفع الحقيقي تحتاج بوابة دفع وحساباً تجارياً.
+</p>
+
+</section>
+</main>
+
+<footer>
+BLOX MART © 2026 — متجر فواكه Blox Fruits
+</footer>
+
+<script>
+
+const products = [
+["Control","كونترول",4],
+["Kitsune","كيتسوني",8],
+["Tiger","نمر",4],
+["Yeti","يتي",4],
+["Lightning","كهرباء",2],
+["Buddha x3","3 بوذا",2],
+["Gas","غاز",3],
+["Venom","فينوم",2],
+["Spirit","سبيريت",2],
+["Portal","بورتال",1],
+["Mammoth","ماموث",2],
+["T-Rex","تيريكس",2],
+["Other Fruits","باقي الفواكه",1]
+];
+
+const ASIA_TO_SAR = 10;
+
+const ratesFromSAR = {
+SAR:1,
+AED:1.022,
+IQD:1745,
+USD:0.2667,
+KWD:0.0818,
+QAR:0.970,
+BHD:0.1007,
+OMR:0.1027
+};
+
+const symbols={
+ASIA:"ASIA",
+SAR:"ر.س",
+AED:"د.إ",
+IQD:"ع.د",
+USD:"$",
+KWD:"د.ك",
+QAR:"ر.ق",
+BHD:"د.ب",
+OMR:"ر.ع"
+};
+
+let currentProduct=products[0];
+
+function convert(asia,c){
+
+if(c==="ASIA")
+return asia;
+
+return asia*ASIA_TO_SAR*ratesFromSAR[c];
+
+}
+
+function format(n,c){
+
+if(c==="IQD")
+return Math.round(n).toLocaleString();
+
+return n.toFixed(2);
+
+}
+
+function render(){
+
+const q=document.getElementById("search").value.toLowerCase();
+
+const c=document.getElementById("currency").value;
+
+const box=document.getElementById("products");
+
+box.innerHTML="";
+
+products
+.filter(p=>(p[0]+" "+p[1]).toLowerCase().includes(q))
+.forEach(p=>{
+
+const value=convert(p[2],c);
+
+const card=document.createElement("div");
+
+card.className="card";
+
+card.innerHTML=`
+<div class="fruit">${p[1]}</div>
+<div class="small">${p[0]}</div>
+<div class="price">${format(value,c)} ${symbols[c]}</div>
+<div class="small">${p[2]} ASIA للواحدة</div>
+<button class="btn" onclick='choose("${p[0]}")'>اختيار</button>
+`;
+
+box.appendChild(card);
+
+});
+
+updateTotal();
+
+}
+
+function choose(id){
+
+currentProduct=
+products.find(p=>p[0]===id)||products[0];
+
+document.getElementById("selected").value=currentProduct[0];
+
+document.getElementById("checkout")
+.scrollIntoView({behavior:"smooth"});
+
+updateTotal();
+
+}
+
+function updateTotal(){
+
+const c=document.getElementById("currency").value;
+
+const qty=
+Number(document.getElementById("qty").value);
+
+const value=
+convert(currentProduct[2]*qty,c);
+
+document.getElementById("total").textContent=
+`الإجمالي: ${format(value,c)} ${symbols[c]} — ${currentProduct[1]} × ${qty}`;
+
+}
+
+function confirmOrder(){
+
+alert("تم تجهيز ملخص الطلب. الدفع الحقيقي غير مفعّل في هذه النسخة التجريبية.");
+
+}
+
+const selected=
+document.getElementById("selected");
+
+products.forEach(p=>{
+
+const o=document.createElement("option");
+
+o.value=p[0];
+
+o.textContent=p[1];
+
+selected.appendChild(o);
+
+});
+
+document.getElementById("search").oninput=render;
+
+document.getElementById("currency").onchange=render;
+
+document.getElementById("qty").onchange=updateTotal;
+
+selected.onchange=e=>{
+
+currentProduct=
+products.find(p=>p[0]===e.target.value)||products[0];
+
+updateTotal();
+
+};
+
+render();
+
+</script>
+
+</body>
+</html>
